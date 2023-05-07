@@ -1,0 +1,191 @@
+CREATE DATABASE biblioteke;
+
+
+CREATE TABLE bibliotekee (
+bibliotekaID INT PRIMARY KEY AUTO_INCREMENT,
+naziv VARCHAR(45),
+ulica VARCHAR(45),
+broj VARCHAR(45),
+mesto VARCHAR(45),
+telefon VARCHAR(45)
+) ENGINE = INNODB;
+
+CREATE TABLE clanovi(
+clanskaKarta INT PRIMARY KEY AUTO_INCREMENT,
+ime VARCHAR(45),
+prezime VARCHAR(45),
+adresa VARCHAR(45),
+datumRodjenja DATE,
+telefon VARCHAR(45),
+ulica VARCHAR(45),
+broj VARCHAR(45)
+) ENGINE = INNODB;
+
+CREATE TABLE bibliotekaClanovi (
+bibliotekaClanoviID INT PRIMARY KEY AUTO_INCREMENT,
+bibliotekaID INT,
+FOREIGN KEY(bibliotekaID)
+REFERENCES bibliotekee(bibliotekaID)
+ON UPDATE CASCADE
+ON DELETE NO ACTION,
+clanskaKarta INT,
+FOREIGN KEY(clanskaKarta)
+REFERENCES clanovi(clanskaKarta)
+ON UPDATE CASCADE
+ON DELETE NO ACTION
+) ENGINE = INNODB;
+
+CREATE TABLE autori(
+autorID INT PRIMARY KEY AUTO_INCREMENT,
+ime VARCHAR(45),
+prezime VARCHAR(45),
+bibliotekaID INT,
+FOREIGN KEY(bibliotekaID)
+REFERENCES bibliotekee(bibliotekaID)
+ON UPDATE CASCADE
+ON DELETE NO ACTION
+) ENGINE = INNODB;
+
+CREATE TABLE odeljenja (
+odeljenjeID INT PRIMARY KEY AUTO_INCREMENT,
+naziv ENUM("dečije", "pozajmno", "naučno"),
+bibliotekaID INT,
+FOREIGN KEY(bibliotekaID)
+REFERENCES bibliotekee(bibliotekaID)
+ON UPDATE CASCADE
+ON DELETE NO ACTION
+) ENGINE = INNODB;
+
+CREATE TABLE bibliotekari (
+bibliotekarID INT PRIMARY KEY AUTO_INCREMENT,
+JMBG INT,
+ime VARCHAR(25),
+prezime VARCHAR(30),
+sifra VARCHAR(45),
+mesto VARCHAR(45),
+ulica VARCHAR(45),
+broj VARCHAR(10),
+telefon VARCHAR(25),
+bibliotekaID INT,
+FOREIGN KEY(bibliotekaID)
+REFERENCES bibliotekee(bibliotekaID)
+ON UPDATE CASCADE
+ON DELETE NO ACTION
+) ENGINE = INNODB;
+
+CREATE TABLE uzrasti (
+uzrastID INT PRIMARY KEY AUTO_INCREMENT,
+uzrast INT
+) ENGINE = INNODB;
+
+CREATE TABLE zanrovi (
+zanrID INT PRIMARY KEY AUTO_INCREMENT,
+naziv VARCHAR(45)
+) ENGINE = INNODB;
+
+CREATE TABLE naucni (
+naucniID INT PRIMARY KEY AUTO_INCREMENT,
+naziv VARCHAR(45)
+) ENGINE = INNODB;
+
+CREATE TABLE aktuelnosti (
+aktuelnostiID INT PRIMARY KEY AUTO_INCREMENT,
+aktuelnosti VARCHAR(45)
+) ENGINE = INNODB;
+
+CREATE TABLE knjige (
+ISBNbroj INT PRIMARY KEY AUTO_INCREMENT,
+naziv VARCHAR(45),
+jezik VARCHAR(45),
+uzrastID INT,
+FOREIGN KEY(uzrastID)
+REFERENCES uzrasti(uzrastID)
+ON UPDATE CASCADE
+ON DELETE NO ACTION,
+zanrID INT,
+FOREIGN KEY(zanrID)
+REFERENCES zanrovi(zanrID)
+ON UPDATE CASCADE
+ON DELETE NO ACTION,
+naucniID INT,
+FOREIGN KEY(naucniID)
+REFERENCES naucni(naucniID)
+ON UPDATE CASCADE
+ON DELETE NO ACTION,
+aktuelnostiID INT,
+FOREIGN KEY(aktuelnostiID)
+REFERENCES aktuelnosti(aktuelnostiID)
+ON UPDATE CASCADE
+ON DELETE NO ACTION
+) ENGINE = INNODB;
+
+CREATE TABLE knjigeAutori (
+knjigaAutorID INT PRIMARY KEY AUTO_INCREMENT,
+ISBNbroj INT,
+FOREIGN KEY(ISBNbroj)
+REFERENCES knjige(ISBNbroj)
+ON UPDATE CASCADE
+ON DELETE NO ACTION,
+autorID INT,
+FOREIGN KEY(autorID)
+REFERENCES autori(autorID)
+ON UPDATE CASCADE
+ON DELETE NO ACTION
+) ENGINE = INNODB;
+
+CREATE TABLE izdavanja (
+izdavanjeID INT PRIMARY KEY AUTO_INCREMENT,
+datumIzdavanja DATE,
+datumVracanja DATE,
+ISBNbroj INT,
+FOREIGN KEY(ISBNbroj)
+REFERENCES knjige(ISBNbroj)
+ON UPDATE CASCADE
+ON DELETE NO ACTION,
+clanskaKarta INT,
+FOREIGN KEY(clanskaKarta)
+REFERENCES clanovi(clanskaKarta)
+ON UPDATE CASCADE
+ON DELETE NO ACTION,
+bibliotekarID INT,
+FOREIGN KEY(bibliotekarID)
+REFERENCES bibliotekari(bibliotekarID)
+ON UPDATE CASCADE
+ON DELETE NO ACTION
+) ENGINE = INNODB;
+
+ALTER TABLE clanovi
+DROP COLUMN adresa;
+
+INSERT INTO `clanovi`( `ime`, `prezime`, `datumRodjenja`, `telefon`, `ulica`, `broj`)
+VALUES ("Miloš", "Božović", '1979-03-25', "+381631230337", "Jelenov Žleb", "4"), 
+("Pera", "Peric", '1985-05-12', "+381621111337", "Pozeska", "24")
+
+INSERT INTO `bibliotekaclanovi`( `bibliotekaID`, `clanskaKarta`) VALUES (1, 1), (2, 2), (3, 2)
+
+INSERT INTO `autori`(`ime`, `prezime`, `bibliotekaID`) VALUES ("Miloš", "Crnjanski", 1), 
+("Dobrica", "Cosic", 1), ("Ivo", "Andric", 2)
+
+INSERT INTO `odeljenja`(`naziv`, `bibliotekaID`) VALUES ('dečije', 1), ('pozajmno', 1), ('naucno', 1)
+
+INSERT INTO `bibliotekari`(`JMBG`, `ime`, `prezime`, `sifra`, `mesto`, `ulica`, `broj`, `telefon`, `bibliotekaID`) 
+VALUES (2503979710096, "Jova", "Jovic", "4342", "Beograd", "Jablanicka", "12", "0111111321", 1), 
+(1101999715222, "Jovana", "Jovanovic", "1352", "Beograd", "Kumodraska", "15c", "011552145", 1), 
+(2812985711235, "Aca", "Acic", "7711", "Beograd", "Savska", "335", "011578121", 2)
+
+INSERT INTO `uzrasti`(`uzrast`) VALUES (7), (11), (14), (18)
+
+INSERT INTO `zanrovi`(`naziv`) VALUES ("Beletristika"), ("Avanturistički"), ("Triler"), ("Komedija")
+
+INSERT INTO `naucni`(`naziv`) VALUES ("Hemija"), ("Fizika"), ("Matematika"), ("Psihologija")
+
+INSERT INTO `aktuelnosti`(`aktuelnosti`) VALUES ("Bestseler"), ("3 zvezdice"), ("2 zvezdice")
+
+INSERT INTO `knjige`(`naziv`, `jezik`, `uzrastID`, `zanrID`, `naucniID`, `aktuelnostiID`) VALUES 
+("Hemija 1", "srpski", 2, NULL, 1, 1), ("Psihoanaliza", "srpski", 3, 1, 4, 2)
+
+INSERT INTO `knjigeautori`(`ISBNbroj`, `autorID`) VALUES (1, 1), (2, 2)
+
+INSERT INTO `izdavanja`(`datumIzdavanja`, `datumVracanja`, `ISBNbroj`, `clanskaKarta`, `bibliotekarID`) 
+VALUES ('2023-04-28','2023-04-30', 1, 1, 2), 
+('2023-02-08','2023-03-01', 2, 1, 1), ('2023-03-12','2023-03-15', 2, 2, 1)
